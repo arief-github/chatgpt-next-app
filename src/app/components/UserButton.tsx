@@ -16,7 +16,7 @@ export default function UserButton() {
 
     return (
         <div>
-            {status === "authenticated" && (
+            {status === "authenticated" ? (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Avatar>
@@ -36,10 +36,10 @@ export default function UserButton() {
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-            )}
-            {status === "unauthenticated" && (
+            ) : null}
+            {status === "unauthenticated" ? (
                 <Button onClick={() => signIn()}>Sign in</Button>
-            )}
+            ): null}
         </div>
     );
 }
