@@ -5,7 +5,7 @@ import GithubProvider from 'next-auth/providers/github';
 const authOptions = {
     callbacks: {
         async signIn({ profile }: { profile: { login: string } }) {
-            return profile.login === "arief"
+            return profile.login === "arief-github"
         }
     } as unknown as CallbacksOptions,
     providers: [
