@@ -4,6 +4,8 @@ import "./globals.css";
 import Link from "next/link";
 import { SessionProvider } from './components/SessionProvider';
 import UserButton from "@/app/components/UserButton";
+import ClientComponent from "@/ClientComponent";
+import ServerComponent from "@/ServerComponent";
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -36,6 +38,9 @@ export default function RootLayout({
           <div className='flex flex-col md:flex-flow'>
               <div className='flex-grow'>{children}</div>
           </div>
+          <ClientComponent>
+              <ServerComponent />
+          </ClientComponent>
           </body>
           </html>
       </SessionProvider>

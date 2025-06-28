@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useLayoutEffect } from 'react';
+import Container from "@/Container";
 
 type UserTypes = {
-    name: string
+    children: React.ReactNode
 }
-const ClientComponent = ({ name }: UserTypes) => {
+const ClientComponent = ({ children }: UserTypes) => {
     const [counter, setConter] = useState<number>(0)
     console.log('Client Component')
 
@@ -25,7 +26,11 @@ const ClientComponent = ({ name }: UserTypes) => {
             <p>Counter : {counter}</p>
             <button onClick={() => setConter(counter + 1)} className='bg-blue-500 hover:bg-blue-700 text-white font-bold'>Increment</button>
 
-            <p>{name}</p>
+            {/*<p>{name}</p>*/}
+
+            <Container>
+                {children}
+            </Container>
         </div>
     );
 };
