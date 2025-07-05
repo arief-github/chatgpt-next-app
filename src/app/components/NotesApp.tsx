@@ -1,63 +1,122 @@
 "use client";
 
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { useState, useEffect } from "react";
-import { Note, NoteInput, handleNote, getNotes } from '@/app/server-actions/notesAction'
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+
+import { Button } from "@/components/ui/button";
+import NoteFormCard from "@/app/components/NoteFormCard";
+import NoteCard from "@/app/components/NoteCard";
+
+import {
+    handleNote,
+    getNotes,
+    deleteNote,
+    getNotesByTag,
+    NoteInput,
+} from "@/app/server-actions/notesAction";
+
+type Note = {
+    id: string;
+    title: string;
+    content: string;
+    tag: string;
+};
+
+type FormData = {
+    title: string;
+    content: string;
+    tag: string;
+};
 
 export default function NotesApp() {
-    const [notes, setNotes] = useState<Note[]>([])
-    const [title, setTitle] = useState<string>("")
-    const [content, setContent] = useState<string>("")
-    const [tag, setTag] = useState<string>("")
-    const [editingId, setEditingId] = useState<string | null>(null)
+    const [notes, setNotes] = useState<Note[]>([]);
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [activeTag, setActiveTag] = useState<string>("");
+
+    const form = useForm<FormData>({
+        defaultValues: { title: "", content: "", tag: "" },
+    });
+
+    const { control, handleSubmit, reset, setValue, formState } = form;
 
     useEffect(() => {
-        getNotes().then(setNotes)
+        getNotes().then(setNotes);
     }, []);
 
-    const onSave = async () => {
-        const input: NoteInput = editingId ? { action: 'update', id: editingId, title, content, tag } : { action: 'create', title, content, tag }
-        const updateNotes = await handleNote(input)
+    const onSubmit = async (data: FormData) => {
+        const input: NoteInput = editingId
+            ? { action: "update", id: editingId, ...data }
+            : { action: "create", ...data };
 
-        setNotes(updateNotes)
+        const updated = await handleNote(input);
+        setNotes(updated);
+        setEditingId(null);
+        reset(); // clear form
+    };
 
-        // Reset Form
-        setTitle("")
-        setContent("")
-        setTag("")
-        setEditingId(null)
-    }
+    const handleEdit = (note: Note) => {
+        setEditingId(note.id);
+        setValue("title", note.title);
+        setValue("content", note.content);
+        setValue("tag", note.tag);
+    };
 
-    const startEdit = (note: Note) => {
-        setTitle(note.title)
-        setContent(note.content)
-        setTag(note.tag)
-        setEditingId(note.id)
-    }
+    const handleDelete = async (id: string) => {
+        const updated = await deleteNote(id);
+        setNotes(updated);
+    };
+
+    const handleFilter = async (tag: string) => {
+        if (tag === "") {
+            const all = await getNotes();
+            setNotes(all);
+            setActiveTag("");
+        } else {
+            const filtered = await getNotesByTag(tag);
+            setNotes(filtered);
+            setActiveTag(tag);
+        }
+    };
+
+    const allTags = Array.from(new Set(notes.map((n) => n.tag).filter(Boolean)));
 
     return (
-        <div className='max-w-xl mx-auto py-8 space-y-6'>
-            <div className='space-y-3'>
-                <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" />
-                <Input value={content} onChange={(e) => setContent(e.target.value)} placeholder="Content" />
-                <Input value={tag} onChange={(e) => setTag(e.target.value)} placeholder="Tag" />
-                <Button onClick={onSave}>
-                    {editingId ? "Update Note" : "Create Note"}
+        <div className="max-w-2xl mx-auto py-10 space-y-6">
+            <NoteFormCard
+                onSubmit={handleSubmit(onSubmit)}
+                control={control}
+                errors={formState.errors}
+                editingId={editingId}
+            />
+
+            <div className="flex flex-wrap gap-2">
+                <Button
+                    variant={activeTag === "" ? "default" : "outline"}
+                    onClick={() => handleFilter("")}
+                >
+                    All
                 </Button>
+                {allTags.map((tag) => (
+                    <Button
+                        key={tag}
+                        variant={activeTag === tag ? "default" : "outline"}
+                        onClick={() => handleFilter(tag)}
+                    >
+                        #{tag}
+                    </Button>
+                ))}
             </div>
-            <div className='space-y-4'>
+
+            <div className="grid gap-4">
                 {notes.map((note) => (
-                    <div key={note.id} className="p-4 border rounded shadow-sm">
-                        <h2 className="font-bold">{note.title}</h2>
-                        <p>{note.content}</p>
-                        {note.tag && <span className="text-sm text-blue-600">#{note.tag}</span>}
-                        <div className="mt-2 flex gap-2">
-                            <Button size="sm" onClick={() => startEdit(note)}>Edit</Button>
-                        </div>
-                    </div>
+                    <NoteCard
+                        key={note.id}
+                        note={note}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                    />
                 ))}
             </div>
         </div>
-    )
+    );
 }

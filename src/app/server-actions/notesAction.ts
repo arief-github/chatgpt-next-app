@@ -62,3 +62,7 @@ export async function deleteNote(id: string): Promise<Note[]> {
     notes = notes.filter(note => note.id !== id)
     return notes;
 }
+
+export async function getNotesByTag(tag: string): Promise<Note[]> {
+    return notes.filter(note => note.tag.toLowerCase() === tag.toLowerCase())
+}

@@ -1,8 +1,8 @@
 // route handler
-import NextAuth, { CallbacksOptions } from 'next-auth';
+import NextAuth, { CallbacksOptions, AuthOptions } from 'next-auth';
 import GithubProvider from 'next-auth/providers/github';
 
-const authOptions = {
+const authOptions: AuthOptions = {
     callbacks: {
         async signIn({ profile }: { profile: { login: string } }) {
             return profile.login === "arief-github"
