@@ -1,6 +1,8 @@
-"use server";
+// app/actions/noteActions.ts or wherever your server actions live
 
-import { v4 as uuid } from 'uuid'
+"use server"
+
+import prisma from "@/lib/prisma" // assumes you have lib/prisma.ts
 
 export type Note = {
     id: string
@@ -9,60 +11,62 @@ export type Note = {
     tag: string
 }
 
-let notes: Note[] = []
-
 export type NoteInput =
-    |{
-        action: 'create'
-        title: string
-        content: string
-        tag?: string
-    }
-    |{
-        action: 'update'
-        id: string,
-        title?: string
-        content?: string
-        tag?: string
-    }
+    | {
+    action: 'create'
+    title: string
+    content: string
+    tag?: string
+}
+    | {
+    action: 'update'
+    id: string
+    title?: string
+    content?: string
+    tag?: string
+}
 
 export async function handleNote(input: NoteInput): Promise<Note[]> {
-    if (input.action === 'create') {
-        const newNote: Note = {
-            id: uuid(),
-            title: input.title,
-            content: input.content,
-            tag: input.tag ?? ''
-        }
-
-        notes.push(newNote)
-    }
-
-    if (input.action === 'update') {
-        notes = notes.map(note => {
-            if(note.id === input.id) {
-                return {
-                    ...note,
-                    ...input
-                }
-            }
-
-            return note
+    if (input.action === "create") {
+        await prisma.note.create({
+            data: {
+                title: input.title,
+                content: input.content,
+                tag: input.tag ?? "",
+            },
         })
     }
 
-    return notes;
+    if (input.action === "update") {
+        await prisma.note.update({
+            where: { id: input.id },
+            data: {
+                title: input.title,
+                content: input.content,
+                tag: input.tag,
+            },
+        })
+    }
+
+    return await prisma.note.findMany()
 }
 
 export async function getNotes(): Promise<Note[]> {
-    return notes;
+    return await prisma.note.findMany()
 }
 
 export async function deleteNote(id: string): Promise<Note[]> {
-    notes = notes.filter(note => note.id !== id)
-    return notes;
+    await prisma.note.delete({ where: { id } })
+    return await prisma.note.findMany()
 }
 
 export async function getNotesByTag(tag: string): Promise<Note[]> {
-    return notes.filter(note => note.tag.toLowerCase() === tag.toLowerCase())
+    return await prisma.note.findMany({
+        where: {
+            tag: {
+                equals: tag,
+                mode: 'insensitive', // case-insensitive matching
+            },
+        },
+    })
 }

@@ -1,12 +1,10 @@
 "use client";
 import React from  'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
     Control,
     FieldErrors,
-    useForm,
     useController,
 } from 'react-hook-form';
 
@@ -67,8 +65,6 @@ export default function NoteFormCard({
     control,
     errors
 }: NoteFormCardProps) {
-    const methods = useForm()
-
     return (
         <Card>
             <CardHeader>
