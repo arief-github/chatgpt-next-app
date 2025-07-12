@@ -3,7 +3,6 @@
 "use server"
 
 import prisma from "@/lib/prisma" // assumes you have lib/prisma.ts
-import { Prisma } from "@prisma/client"
 
 export type Note = {
     id: string
