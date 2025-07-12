@@ -1,0 +1,25 @@
+// CREATE TABLE notes (
+//     id SERIAL PRIMARY KEY
+//     title VARCHAR(255) Not Null
+//     content VARCHAR(255)
+//     tag VARCHAR(255)
+//     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+// );
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url = env("POSTGRES_PRISMA_URL")
+    directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model Note {
+    id      String      @default(cuid())    @id
+    title   String
+    content String?
+    tag     String
+    timestamp   DateTime    @default(now())
+}
